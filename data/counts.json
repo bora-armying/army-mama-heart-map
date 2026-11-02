@@ -1,12 +1,12 @@
 {
-  "demo": true,
-  "updatedAt": null,
+  "demo": false,
+  "updatedAt": "2026-11-02T21:04:27.971Z",
   "counts": {
-    "asia": 1840,
-    "europe": 620,
-    "africa": 145,
-    "north-america": 730,
-    "south-america": 410,
-    "oceania": 58
+    "asia": 0,
+    "europe": 0,
+    "africa": 0,
+    "north-america": 0,
+    "south-america": 0,
+    "oceania": 0
   }
 }
