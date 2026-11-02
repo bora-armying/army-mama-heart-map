@@ -11,6 +11,9 @@
   ]);
   const continents = challenge.continents;
   const repo = challenge.repo || repoFromLocation();
+  // npm start: saves go to scripts/dev-server.mjs and never reach the live site.
+  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const api = isLocal ? '/local-api/' : `https://api.github.com/repos/${repo}/contents/`;
 
   // owner.github.io/repo/ names the repo, so no setup is needed on GitHub Pages.
   function repoFromLocation() {
@@ -95,7 +98,10 @@
     status('Saved token removed from this device.');
   });
 
-  if (!repo) {
+  $('practice').hidden = !isLocal;
+  $('token-section').hidden = isLocal;
+
+  if (!repo && !isLocal) {
     status('Open this page on the published site to save counts.', 'error');
     $('save').disabled = true;
   }
@@ -110,7 +116,7 @@
   }
 
   async function github(path, options = {}) {
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+    const res = await fetch(`${api}${path}`, {
       cache: 'no-store',
       ...options,
       headers: {
@@ -130,7 +136,7 @@
     e.preventDefault();
     const { counts, bad } = readCounts();
     if (bad.length) return status(`Enter a whole number for ${bad.join(', ')}. Use 0 if there are no comments yet.`, 'error');
-    if (!$('token').value.trim()) return status('Paste your GitHub access token first.', 'error');
+    if (!isLocal && !$('token').value.trim()) return status('Paste your GitHub access token first.', 'error');
 
     $('save').disabled = true;
     status('Saving...');
@@ -157,13 +163,14 @@
         }),
       });
       confirmedDrop = '';
+      if (isLocal) return status('Saved on this computer. Open or reload the map to see it.', 'success');
       storeToken($('remember').checked ? $('token').value.trim() : '');
       showForget();
       status('Saved. The map updates in about 2 minutes.', 'success');
     } catch (err) {
       status(err instanceof TypeError ? 'Couldn\'t reach GitHub. Check your connection and try again.' : err.message, 'error');
     } finally {
-      $('save').disabled = !repo;
+      $('save').disabled = !repo && !isLocal;
     }
   });
 })();

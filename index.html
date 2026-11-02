@@ -8,17 +8,13 @@
 <meta name="description" content="Vote for BTS at the 2026 MAMA Awards, comment your receipt on Instagram, and light a purple heart on your continent's map.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Open+Sans:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="wrap">
   <header class="hero">
-    <h1>
-      <span class="line">ARMY</span>
-      <span class="line highlight">all over the world,</span>
-      <span class="line">BTS needs you!</span>
-    </h1>
+    <h1><img class="headline" id="headline" src="assets/headline.png" width="1611" height="793" alt="ARMY all over the world, BTS needs you!"></h1>
     <p class="total"><strong id="total">0</strong> purple hearts lit so far</p>
   </header>
 
@@ -36,6 +32,7 @@
       <p class="caption-text" id="caption" aria-live="polite"></p>
       <div class="caption-actions">
         <button class="ghost" id="simulate" type="button" hidden>Simulate a comment</button>
+        <button class="ghost" id="save-image" type="button">Save map image</button>
         <a class="cta" id="caption-cta" target="_blank" rel="noopener" hidden></a>
       </div>
     </div>

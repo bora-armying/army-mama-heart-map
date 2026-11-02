@@ -27,6 +27,14 @@ The page is public but can't save without a token, so only people with one can c
 
 Paste it into the page once. Only tick **Remember on this device** on your own device. Each helper who updates counts needs their own token and write access to the repo.
 
+## Save an image for Instagram
+
+**Save map image** under the map makes a 1080 x 1350 PNG of whichever map is showing, with the latest counts and date. On a phone, choose **Save Image** in the share sheet.
+
+## The headline
+
+`assets/headline.png` is the poster's headline rendered in Bacony Script by Måns Grebäck. It's an image so the font file itself isn't published. To change the wording, render it again and replace this file. Commercial licenses for the font are at [mansgreback.com](https://www.mansgreback.com).
+
 ## Reading counts from Instagram
 
 `scripts/sync-instagram.mjs` isn't used by the site. It's kept in case the counts are ever read from Instagram automatically, which needs a Meta app and business portfolio.
@@ -36,5 +44,7 @@ Paste it into the page once. Only tick **Remember on this device** on your own d
 ```
 npm start
 ```
+
+This opens the map at `http://localhost:3000/` and a practice update page at `http://localhost:3000/admin.html`. Practice numbers stay on your computer and never change the live site. `npm run reset` clears them.
 
 `npm run build:map` regenerates `data/continents.json`. You only need it if you change the map shapes. Russia is split at 60°E between Europe and Asia.

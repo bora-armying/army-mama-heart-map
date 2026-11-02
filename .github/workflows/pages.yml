@@ -17,7 +17,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir _site
-          cp -R index.html admin.html styles.css app.js admin.js data _site/
+          cp -R index.html admin.html styles.css app.js admin.js data assets _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

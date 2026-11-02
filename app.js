@@ -252,6 +252,22 @@
     renderStatic();
   }
 
+  function drawMap(c, view) {
+    c.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    view.background.forEach((p) => c.fill(p));
+    const size = heartSize(view);
+    for (const [id, layer] of Object.entries(view.layers)) {
+      c.fillStyle = 'rgba(217, 200, 245, 0.2)';
+      c.fill(layer.path);
+      const n = Math.min(counts[id] ?? 0, MAX_DRAWN);
+      layer.ensure(n);
+      for (let i = 0; i < Math.min(n, layer.spots.length); i++) {
+        const spot = layer.spots[i];
+        drawHeart(c, spot.x, spot.y, size * spot.wobble, 0.92);
+      }
+    }
+  }
+
   function renderStatic() {
     const view = getView(current);
     staticLayer = document.createElement('canvas');
@@ -260,19 +276,11 @@
     const c = staticLayer.getContext('2d');
     const scale = canvas.width / view.size.w;
     c.scale(scale, scale);
-    c.fillStyle = 'rgba(255, 255, 255, 0.06)';
-    view.background.forEach((p) => c.fill(p));
-    c.fillStyle = 'rgba(217, 200, 245, 0.2)';
+    drawMap(c, view);
     twinkles.length = 0;
     const size = heartSize(view);
     for (const [id, layer] of Object.entries(view.layers)) {
-      c.fill(layer.path);
       const n = Math.min(counts[id] ?? 0, MAX_DRAWN);
-      layer.ensure(n);
-      for (let i = 0; i < Math.min(n, layer.spots.length); i++) {
-        const spot = layer.spots[i];
-        drawHeart(c, spot.x, spot.y, size * spot.wobble, 0.92);
-      }
       // A small rotating set shimmers; animating all of them would be wasted work.
       const step = Math.max(1, Math.floor(n / 24));
       for (let i = 0; i < n && i < layer.spots.length; i += step) {
@@ -315,6 +323,138 @@
 
   function startLoop() {
     if (rafId === null) rafId = requestAnimationFrame(loop);
+  }
+
+  // ---- Saved image: a 4:5 Instagram post of whichever map is showing ----
+  const IMAGE = { w: 1080, h: 1350, font: '"Open Sans", "Segoe UI", sans-serif' };
+
+  function loadHeadline() {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = $('headline').src;
+    });
+  }
+
+  async function renderImage() {
+    await Promise.all([
+      document.fonts.load(`800 40px ${IMAGE.font}`),
+      document.fonts.load(`600 28px ${IMAGE.font}`),
+    ]);
+    const headline = await loadHeadline();
+    const out = document.createElement('canvas');
+    out.width = IMAGE.w;
+    out.height = IMAGE.h;
+    const c = out.getContext('2d');
+    const text = (value, x, y, size, weight, color, align = 'center') => {
+      c.font = `${weight} ${size}px ${IMAGE.font}`;
+      c.fillStyle = color;
+      c.textAlign = align;
+      c.fillText(value, x, y);
+    };
+
+    const sky = c.createLinearGradient(0, 0, IMAGE.w, IMAGE.h);
+    sky.addColorStop(0, '#7b4fc9');
+    sky.addColorStop(0.22, '#4b2496');
+    sky.addColorStop(0.55, '#2f1270');
+    sky.addColorStop(1, '#1d0a4d');
+    c.fillStyle = sky;
+    c.fillRect(0, 0, IMAGE.w, IMAGE.h);
+
+    const view = getView(current);
+    const isWorld = current === 'world';
+    const mapW = 1000;
+    const mapH = (view.size.h / view.size.w) * mapW;
+    const rowH = 60;
+    const rowsH = isWorld ? 44 + rowH * 3 : 0;
+
+    const headW = 760;
+    const headH = (headline.naturalHeight / headline.naturalWidth) * headW;
+    // Centres everything above the footer line, whichever map is showing.
+    const blockH = headH + 62 + 26 + mapH + rowsH;
+    const top = Math.max(36, (IMAGE.h - 80 - blockH) / 2);
+    c.drawImage(headline, (IMAGE.w - headW) / 2, top, headW, headH);
+
+    const n = isWorld ? total() : counts[current] ?? 0;
+    const place = isWorld ? '' : ` in ${byId[current].name}`;
+    let y = top + headH + 62;
+    text(`${fmt(n)} purple ${n === 1 ? 'heart' : 'hearts'} lit${place}`, IMAGE.w / 2, y, 40, 800, '#ffdc5e');
+
+    y += 26;
+    const mapX = (IMAGE.w - mapW) / 2;
+    c.fillStyle = 'rgba(29, 10, 77, 0.55)';
+    c.fillRect(mapX, y, mapW, mapH);
+    c.save();
+    c.beginPath();
+    c.rect(mapX, y, mapW, mapH);
+    c.clip();
+    c.translate(mapX, y);
+    c.scale(mapW / view.size.w, mapW / view.size.w);
+    drawMap(c, view);
+    c.restore();
+    y += mapH;
+
+    if (isWorld) {
+      const ranked = [...continents].sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0));
+      const firstRow = y + 66;
+      ranked.forEach((co, i) => {
+        const col = i % 2;
+        const rowY = firstRow + Math.floor(i / 2) * rowH;
+        const left = col ? 580 : 40;
+        const right = col ? 1040 : 500;
+        text(co.name, left, rowY, 34, 600, '#ffffff', 'left');
+        text(fmt(counts[co.id] ?? 0), right, rowY, 34, 800, '#ffdc5e', 'right');
+      });
+    }
+
+    const stamp = new Date(updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    text(`@${challenge.instagram}  ·  Updated ${stamp}`, IMAGE.w / 2, IMAGE.h - 40, 26, 600, '#d9c8f5');
+
+    // Sample numbers must never pass for real ones if the image gets posted.
+    if (demo) {
+      c.save();
+      c.translate(IMAGE.w / 2, y - mapH / 2);
+      c.rotate(-0.2);
+      text('SAMPLE, NOT REAL COUNTS', 0, 0, 64, 800, 'rgba(255, 220, 94, 0.85)');
+      c.restore();
+    }
+    return new Promise((resolve) => out.toBlob(resolve, 'image/png'));
+  }
+
+  async function saveImage() {
+    const button = $('save-image');
+    const label = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Preparing image...';
+    try {
+      const blob = await renderImage();
+      const day = new Date().toLocaleDateString('en-CA'); // local date, as YYYY-MM-DD
+      const name = `army-heart-map-${current}-${day}.png`;
+      const file = new File([blob], name, { type: 'image/png' });
+      // On phones the share sheet is what offers Save Image to the photo library.
+      if (matchMedia('(pointer: coarse)').matches && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (err) {
+      if (err.name !== 'AbortError') { // AbortError: the share sheet was closed
+        button.textContent = 'Couldn\'t save. Try again.';
+        setTimeout(() => { button.textContent = label; }, 3000);
+        return;
+      }
+    } finally {
+      button.disabled = false;
+    }
+    button.textContent = label;
   }
 
   // ---- UI ----
@@ -488,6 +628,8 @@
     const id = ids[Math.floor(Math.random() * ids.length)];
     applyCounts({ ...counts, [id]: (counts[id] ?? 0) + 1 });
   });
+
+  $('save-image').addEventListener('click', saveImage);
 
   $('ig-link').href = profileUrl;
   $('ig-link').textContent = `@${challenge.instagram}`;

@@ -8,12 +8,13 @@
   --milk: #ffffff;
   --lilac: #d9c8f5;
   --line: rgba(255, 255, 255, 0.18);
-  --display: 'Kaushan Script', 'Brush Script MT', cursive;
   --body: 'Open Sans', 'Segoe UI', system-ui, sans-serif;
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -38,24 +39,8 @@ body {
 
 .hero { text-align: center; display: grid; gap: 16px; justify-items: center; }
 
-h1 {
-  margin: 0;
-  display: grid;
-  justify-items: center;
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
-  line-height: 1.1;
-  text-shadow: 0 3px 18px rgba(29, 10, 77, 0.45);
-}
-
-.highlight {
-  background: var(--butter);
-  color: var(--grape-deep);
-  padding: 0 0.35em 0.06em;
-  font-size: 0.72em;
-  text-shadow: none;
-}
+h1 { margin: 0; }
+.headline { display: block; width: min(100%, 620px); height: auto; margin-inline: auto; }
 
 .total { margin: 0; font-weight: 600; color: var(--lilac); }
 .total strong {
@@ -186,7 +171,7 @@ footer p { margin: 0; }
 
 .admin { max-width: 560px; }
 .admin p { margin: 0; }
-.admin-title { font-size: clamp(2rem, 7vw, 3rem); justify-items: start; display: block; }
+.admin-title { font-size: clamp(1.75rem, 6vw, 2.25rem); font-weight: 800; line-height: 1.2; }
 #form { display: grid; gap: 20px; }
 .admin-fields { display: grid; gap: 10px; }
 .admin-field { display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center; font-weight: 600; }

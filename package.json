@@ -5,7 +5,8 @@
   "scripts": {
     "build:map": "node scripts/build-continents.mjs",
     "sync": "node scripts/sync-instagram.mjs",
-    "start": "npx --yes serve@14.2.4 ."
+    "start": "node scripts/dev-server.mjs",
+    "reset": "node scripts/dev-server.mjs --reset"
   },
   "devDependencies": {
     "topojson-client": "3.1.0",
