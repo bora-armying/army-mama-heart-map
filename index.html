@@ -14,7 +14,7 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <h1><img class="headline" id="headline" src="assets/headline.png" width="1611" height="793" alt="ARMY all over the world, BTS needs you!"></h1>
+    <h1><img class="headline" id="headline" src="assets/headline-light.png" width="1561" height="741" alt="ARMY all over the world, BTS needs you!"></h1>
     <p class="total"><strong id="total">0</strong> purple hearts lit so far</p>
   </header>
 
@@ -25,9 +25,12 @@
   <section class="stage" aria-label="Heart map">
     <div class="tabs" id="tabs"></div>
     <div class="map" id="map">
-      <canvas id="canvas" role="img"></canvas>
-      <div id="chips"></div>
+      <div class="map-inner" id="map-inner">
+        <canvas id="canvas" role="img"></canvas>
+        <div id="chips"></div>
+      </div>
     </div>
+    <p class="swipe-hint" id="swipe-hint">Swipe the map to see every continent</p>
     <div class="caption">
       <p class="caption-text" id="caption" aria-live="polite"></p>
       <div class="caption-actions">
@@ -38,27 +41,35 @@
     </div>
   </section>
 
-  <div class="columns">
-    <section class="steps">
-      <h2>To join the challenge</h2>
-      <ol>
-        <li><span id="vote-step">Vote for BTS at the Mnet MAMA Awards 2026</span> and save your voting receipt.</li>
-        <li>Go to <a id="ig-link" target="_blank" rel="noopener"></a> on Instagram and find the post for your continent.</li>
-        <li>Drop your voting receipt in the comments.</li>
-        <li>Every receipt you comment lights a purple heart on your continent's map.</li>
-      </ol>
-    </section>
+  <section class="join">
+    <h2>How to join</h2>
+    <ol class="steps">
+      <li>
+        <h3>Vote</h3>
+        <p><span id="vote-step">Vote for BTS at the Mnet MAMA Awards 2026</span> and save your voting receipt.</p>
+      </li>
+      <li>
+        <h3>Find your post</h3>
+        <p>Go to <a id="ig-link" target="_blank" rel="noopener"></a> on Instagram and find the post for your continent.</p>
+      </li>
+      <li>
+        <h3>Comment</h3>
+        <p>Drop your voting receipt in the comments.</p>
+      </li>
+      <li>
+        <h3>Light a heart</h3>
+        <p>Every receipt you comment lights a purple heart on your continent's map.</p>
+      </li>
+    </ol>
+  </section>
 
-    <section class="posts">
-      <h2>Find your continent's post</h2>
-      <ul id="posts"></ul>
-    </section>
-  </div>
+  <section class="join">
+    <h2>Find your continent's post</h2>
+    <ul class="tiles" id="posts"></ul>
+  </section>
 
-  <footer>
-    <p>The challenge happens on Instagram only. This page shows the hearts and doesn't collect anything from you.</p>
+  <footer id="footer" hidden>
     <p id="updated"></p>
-    <p>A fan-run project. Not affiliated with BTS, BIGHIT MUSIC, HYBE, Mnet or CJ ENM.</p>
   </footer>
 </div>
 <script src="app.js"></script>

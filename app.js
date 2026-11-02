@@ -3,7 +3,14 @@
   const MAX_DRAWN = 50000; // per continent; past this the land is solid glow anyway
   const WORLD = { w: 1000, h: 500 };
   const DETAIL = { w: 1000, h: 640 };
+  const DETAIL_PHONE = { w: 1000, h: 1000 }; // tall screens have the height to spare
+  const phone = matchMedia('(max-width: 720px)');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const BEAT_MS = 1600;
+  const REVEAL_MS = 1100;
+  const POP_MS = 1000;
+  const FLOATER_MS = 420;
+  const MAX_PARTICLES = 150;
 
   // Map centre for each continent's close-up, and where its world-map label sits.
   const GEO = {
@@ -195,11 +202,10 @@
   // ---- Views ----
   const views = {};
 
-  function getView(id) {
-    if (views[id]) return views[id];
-    const view = id === 'world' ? buildWorldView() : buildDetailView(id);
-    views[id] = view;
-    return view;
+  function getView(id, phoneLayout = phone.matches) {
+    const key = id === 'world' ? id : `${id}:${phoneLayout ? 'phone' : 'wide'}`;
+    views[key] ??= id === 'world' ? buildWorldView() : buildDetailView(id, phoneLayout ? DETAIL_PHONE : DETAIL);
+    return views[key];
   }
 
   function buildWorldView() {
@@ -221,24 +227,28 @@
     };
   }
 
-  function buildDetailView(id) {
+  function buildDetailView(id, size) {
     const center = GEO[id].center;
     const near = (pt) => angularDistance(center, pt) < 100;
     const nearPolys = shapes[id].filter((rings) => rings[0].every(near));
-    const project = fit(lambert(center), nearPolys, DETAIL, 28, 0.01);
+    const project = fit(lambert(center), nearPolys, size, 28, 0.01);
     const others = Object.keys(shapes).filter((k) => k !== id).flatMap((k) => shapes[k]);
     const path = buildPath(project, shapes[id], near);
     return {
-      size: DETAIL,
+      size,
       background: [buildPath(project, others, near)],
-      layers: { [id]: { path, ...buildSpots(path, DETAIL, continents.findIndex((c) => c.id === id) + 1) } },
+      layers: { [id]: { path, ...buildSpots(path, size, continents.findIndex((c) => c.id === id) + 1) } },
       chips: [],
     };
   }
 
   // ---- Rendering ----
   let current = routeFromHash();
+  let landLayer = null;
   let staticLayer = null;
+  const particles = []; // floating and bursting little hearts
+  let lastFloater = 0;
+  let revealStart = 0;
   const popping = []; // newly lit hearts: { id, spot, size, start }
   const twinkles = [];
   let rafId = null;
@@ -246,19 +256,22 @@
   function resize() {
     const view = getView(current);
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    const cssWidth = $('map').clientWidth;
+    const cssWidth = $('map-inner').clientWidth;
     canvas.width = Math.round(cssWidth * dpr);
     canvas.height = Math.round((cssWidth * view.size.h) / view.size.w * dpr);
     renderStatic();
   }
 
-  function drawMap(c, view) {
+  function drawLand(c, view) {
     c.fillStyle = 'rgba(255, 255, 255, 0.06)';
     view.background.forEach((p) => c.fill(p));
+    c.fillStyle = 'rgba(217, 200, 245, 0.2)';
+    Object.values(view.layers).forEach((layer) => c.fill(layer.path));
+  }
+
+  function drawHearts(c, view) {
     const size = heartSize(view);
     for (const [id, layer] of Object.entries(view.layers)) {
-      c.fillStyle = 'rgba(217, 200, 245, 0.2)';
-      c.fill(layer.path);
       const n = Math.min(counts[id] ?? 0, MAX_DRAWN);
       layer.ensure(n);
       for (let i = 0; i < Math.min(n, layer.spots.length); i++) {
@@ -268,26 +281,95 @@
     }
   }
 
-  function renderStatic() {
-    const view = getView(current);
-    staticLayer = document.createElement('canvas');
-    staticLayer.width = canvas.width;
-    staticLayer.height = canvas.height;
-    const c = staticLayer.getContext('2d');
+  function drawMap(c, view) {
+    drawLand(c, view);
+    drawHearts(c, view);
+  }
+
+  function makeLayer(view, draw) {
+    const layer = document.createElement('canvas');
+    layer.width = canvas.width;
+    layer.height = canvas.height;
+    const c = layer.getContext('2d');
     const scale = canvas.width / view.size.w;
     c.scale(scale, scale);
-    drawMap(c, view);
+    draw(c, view);
+    return layer;
+  }
+
+  function renderStatic() {
+    const view = getView(current);
+    landLayer = makeLayer(view, drawLand);
+    staticLayer = makeLayer(view, drawHearts);
     twinkles.length = 0;
     const size = heartSize(view);
     for (const [id, layer] of Object.entries(view.layers)) {
       const n = Math.min(counts[id] ?? 0, MAX_DRAWN);
-      // A small rotating set shimmers; animating all of them would be wasted work.
+      // A small set does the animating; moving all of them would be wasted work.
       const step = Math.max(1, Math.floor(n / 24));
       for (let i = 0; i < n && i < layer.spots.length; i += step) {
-        twinkles.push({ spot: layer.spots[i], size: size * layer.spots[i].wobble, phase: i * 1.7 });
+        twinkles.push({ spot: layer.spots[i], size: size * layer.spots[i].wobble, phase: (i * 317) % BEAT_MS });
       }
     }
     paint(performance.now());
+  }
+
+  // ---- Animation ----
+  // A heartbeat: two quick bumps, then a rest. Returns 0 to about 1.
+  function beat(ms) {
+    const p = (ms % BEAT_MS) / BEAT_MS;
+    return Math.exp(-(((p - 0.08) / 0.05) ** 2)) + 0.7 * Math.exp(-(((p - 0.24) / 0.06) ** 2));
+  }
+
+  function addParticle(fields, now) {
+    if (particles.length < MAX_PARTICLES) particles.push({ born: now, vx: 0, sway: 0, gravity: 0, ...fields });
+  }
+
+  function burst(x, y, size, now) {
+    for (let i = 0; i < 7; i++) {
+      const angle = (i / 7) * Math.PI * 2 + Math.random() * 0.5;
+      const speed = 60 + Math.random() * 50;
+      addParticle({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 30,
+        gravity: 110,
+        size: Math.max(size * 0.7, 6),
+        life: 0.9,
+      }, now);
+    }
+  }
+
+  // Every so often a lit heart lets a little one float away.
+  function spawnFloater(now) {
+    if (now - lastFloater < FLOATER_MS || !twinkles.length) return;
+    lastFloater = now;
+    const { spot, size } = twinkles[Math.floor(Math.random() * twinkles.length)];
+    addParticle({
+      x: spot.x,
+      y: spot.y,
+      vy: -22 - Math.random() * 14,
+      sway: 5 + Math.random() * 6,
+      size: Math.max(size * 1.1, 8),
+      life: 2.6,
+    }, now);
+  }
+
+  function paintParticles(now) {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      const age = (now - p.born) / 1000;
+      if (age >= p.life) {
+        particles.splice(i, 1);
+        continue;
+      }
+      const t = age / p.life;
+      const x = p.x + p.vx * age + p.sway * Math.sin(age * 3.2);
+      const y = p.y + p.vy * age + 0.5 * p.gravity * age * age;
+      // Swells in quickly, fades out over the second half of its life.
+      drawHeart(ctx, x, y, p.size * Math.min(1, t * 8) * (1 - t * 0.4), Math.min(1, 2 - t * 2));
+    }
   }
 
   function paint(now) {
@@ -295,30 +377,50 @@
     const scale = canvas.width / view.size.w;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (staticLayer) ctx.drawImage(staticLayer, 0, 0);
-    ctx.setTransform(scale, 0, 0, scale, 0, 0);
-    if (!reduceMotion) {
-      for (const t of twinkles) {
-        const a = Math.max(0, Math.sin(now / 900 + t.phase));
-        if (a > 0.05) drawHeart(ctx, t.spot.x, t.spot.y, t.size * 1.35, a * 0.8);
-      }
+    if (landLayer) ctx.drawImage(landLayer, 0, 0);
+    const reveal = reduceMotion ? 1 : (now - revealStart) / REVEAL_MS;
+    if (staticLayer && reveal < 1) {
+      // Hearts light up in a ring spreading out from the middle of the map.
+      const eased = 1 - (1 - Math.max(0, reveal)) ** 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, eased * Math.hypot(canvas.width, canvas.height) * 0.55, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(staticLayer, 0, 0);
+      ctx.restore();
+    } else if (staticLayer) {
+      ctx.drawImage(staticLayer, 0, 0);
     }
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    if (!reduceMotion && reveal >= 1) {
+      for (const t of twinkles) {
+        const a = beat(now + t.phase);
+        if (a > 0.05) drawHeart(ctx, t.spot.x, t.spot.y, t.size * (1 + 0.5 * a), Math.min(1, a) * 0.9);
+      }
+      spawnFloater(now);
+    }
+    if (!reduceMotion) paintParticles(now);
     for (let i = popping.length - 1; i >= 0; i--) {
       const p = popping[i];
-      const t = (now - p.start) / 1400;
+      const t = (now - p.start) / POP_MS;
       if (t >= 1 || !view.layers[p.id]) {
         popping.splice(i, 1);
         continue;
       }
       if (t < 0) continue; // staggered, not started yet
-      // Starts large and settles to the heart's resting size.
-      drawHeart(ctx, p.spot.x, p.spot.y, p.size * (1 + 3.5 * (1 - t) * (1 - t)), Math.min(1, 1.6 - t));
+      if (!p.burst) {
+        p.burst = true;
+        burst(p.spot.x, p.spot.y, p.size, now);
+      }
+      // Bounces in big, then wobbles down to the heart's resting size.
+      const bounce = 1 + 3 * Math.exp(-4.5 * t) * Math.abs(Math.cos(9 * t));
+      drawHeart(ctx, p.spot.x, p.spot.y, p.size * bounce, 1 - t * t);
     }
   }
 
   function loop(now) {
     paint(now);
-    rafId = reduceMotion && !popping.length ? null : requestAnimationFrame(loop);
+    rafId = reduceMotion ? null : requestAnimationFrame(loop);
   }
 
   function startLoop() {
@@ -333,7 +435,7 @@
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = reject;
-      img.src = $('headline').src;
+      img.src = 'assets/headline.png'; // the white lettering, for the purple image
     });
   }
 
@@ -362,7 +464,7 @@
     c.fillStyle = sky;
     c.fillRect(0, 0, IMAGE.w, IMAGE.h);
 
-    const view = getView(current);
+    const view = getView(current, false); // the image keeps one layout on every device
     const isWorld = current === 'world';
     const mapW = 1000;
     const mapH = (view.size.h / view.size.w) * mapW;
@@ -526,30 +628,56 @@
     $('simulate').hidden = !demo;
   }
 
+  // A small glowing outline of the continent for its post tile.
+  const thumbs = {};
+
+  function thumb(id) {
+    if (thumbs[id]) return thumbs[id];
+    const size = { w: 600, h: 320 };
+    const center = GEO[id].center;
+    const polygons = shapes[id].filter((rings) => rings[0].every((pt) => angularDistance(center, pt) < 100));
+    const project = fit(lambert(center), polygons, size, 26, 0.01);
+    const out = document.createElement('canvas');
+    out.width = size.w;
+    out.height = size.h;
+    out.setAttribute('aria-hidden', 'true');
+    const c = out.getContext('2d');
+    const ink = c.createLinearGradient(0, 0, size.w, size.h);
+    ink.addColorStop(0, '#7b4fc9');
+    ink.addColorStop(1, '#2f1270');
+    c.shadowColor = 'rgba(123, 79, 201, 0.55)';
+    c.shadowBlur = 18;
+    c.fillStyle = ink;
+    c.fill(buildPath(project, polygons));
+    thumbs[id] = out;
+    return out;
+  }
+
   function renderPosts() {
     const list = $('posts');
     list.replaceChildren();
-    const ranked = [...continents].sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0));
-    for (const c of ranked) {
-      const li = document.createElement('li');
-      const name = document.createElement('button');
-      name.type = 'button';
-      name.className = 'post-name';
+    // Stays in a fixed order so people can find their continent at a glance.
+    for (const c of continents) {
+      const n = counts[c.id] ?? 0;
+      const tile = document.createElement('a');
+      tile.className = 'tile';
+      tile.target = '_blank';
+      tile.rel = 'noopener';
+      tile.href = c.postUrl || profileUrl;
+      const name = document.createElement('span');
+      name.className = 'tile-name';
       name.textContent = c.name;
-      name.addEventListener('click', () => {
-        go(c.id);
-        $('map').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
-      });
       const count = document.createElement('span');
-      count.className = 'post-count';
-      count.textContent = fmt(counts[c.id] ?? 0);
-      const link = document.createElement('a');
-      link.className = 'post-link';
-      link.target = '_blank';
-      link.rel = 'noopener';
-      link.href = c.postUrl || profileUrl;
-      link.textContent = c.postUrl ? 'Comment on this post on Instagram' : `Post coming soon on @${challenge.instagram}`;
-      li.append(name, count, link);
+      count.className = 'tile-count';
+      const number = document.createElement('b');
+      number.textContent = fmt(n);
+      count.append(number, n === 1 ? ' heart' : ' hearts');
+      const action = document.createElement('span');
+      action.className = 'tile-action';
+      action.textContent = c.postUrl ? 'Comment on Instagram ↗' : 'Post coming soon';
+      tile.append(thumb(c.id), name, count, action);
+      const li = document.createElement('li');
+      li.append(tile);
       list.append(li);
     }
   }
@@ -560,6 +688,7 @@
     $('updated').textContent = updatedAt
       ? `Hearts last updated ${new Date(updatedAt).toLocaleString()}.`
       : '';
+    $('footer').hidden = !updatedAt;
   }
 
   function renderText() {
@@ -577,9 +706,15 @@
 
   function show() {
     popping.length = 0;
+    particles.length = 0;
+    revealStart = performance.now();
+    $('map').classList.toggle('is-world', current === 'world');
+    $('swipe-hint').hidden = current !== 'world';
     renderTabs();
     renderText();
     resize();
+    // Start a panning map in the middle, with land on both sides to swipe to.
+    $('map').scrollLeft = ($('map').scrollWidth - $('map').clientWidth) / 2;
     startLoop();
   }
 
@@ -596,9 +731,10 @@
       if (to <= from) continue;
       layer.ensure(to);
       // A big jump between refreshes shouldn't flare thousands at once.
-      for (let i = Math.max(from, to - 60); i < to && i < layer.spots.length; i++) {
+      const first = Math.max(from, to - 60);
+      for (let i = first; i < to && i < layer.spots.length; i++) {
         const spot = layer.spots[i];
-        popping.push({ id, spot, size: size * spot.wobble, start: now + (i - from) * 40 });
+        popping.push({ id, spot, size: size * spot.wobble, start: now + (i - first) * 40 });
       }
     }
     renderText();
@@ -607,19 +743,31 @@
   }
 
   canvas.addEventListener('click', (e) => {
-    if (current !== 'world') return;
     const hit = hitTest(e);
-    if (hit) go(hit);
+    if (!hit) return;
+    if (current === 'world') {
+      go(hit);
+    } else if (!reduceMotion) {
+      const { x, y } = mapPoint(e);
+      burst(x, y, heartSize(getView(current)), performance.now());
+    }
   });
   canvas.addEventListener('mousemove', (e) => {
-    canvas.style.cursor = current === 'world' && hitTest(e) ? 'pointer' : 'default';
+    canvas.style.cursor = hitTest(e) ? 'pointer' : 'default';
   });
 
-  function hitTest(e) {
+  function mapPoint(e) {
     const rect = canvas.getBoundingClientRect();
+    const { size } = getView(current);
+    return {
+      x: ((e.clientX - rect.left) / rect.width) * size.w,
+      y: ((e.clientY - rect.top) / rect.height) * size.h,
+    };
+  }
+
+  function hitTest(e) {
     const view = getView(current);
-    const x = ((e.clientX - rect.left) / rect.width) * view.size.w;
-    const y = ((e.clientY - rect.top) / rect.height) * view.size.h;
+    const { x, y } = mapPoint(e);
     return Object.keys(view.layers).find((id) => view.layers[id].isLand(x, y));
   }
 

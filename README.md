@@ -33,7 +33,7 @@ Paste it into the page once. Only tick **Remember on this device** on your own d
 
 ## The headline
 
-`assets/headline.png` is the poster's headline rendered in Bacony Script by Måns Grebäck. It's an image so the font file itself isn't published. To change the wording, render it again and replace this file. Commercial licenses for the font are at [mansgreback.com](https://www.mansgreback.com).
+`assets/headline-light.png` (purple, for the page) and `assets/headline.png` (white, for saved images) are the poster's headline rendered in Bacony Script by Måns Grebäck. They're images so the font file itself isn't published. To change the wording, render both again. Commercial licenses for the font are at [mansgreback.com](https://www.mansgreback.com).
 
 ## Reading counts from Instagram
 
