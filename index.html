@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ARMY Heart Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Vote for BTS at the 2026 MAMA Awards, comment your receipt on Instagram, and light a purple heart on your continent's map.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Open+Sans:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>
+      <span class="line">ARMY</span>
+      <span class="line highlight">all over the world,</span>
+      <span class="line">BTS needs you!</span>
+    </h1>
+    <p class="total"><strong id="total">0</strong> purple hearts lit so far</p>
+  </header>
+
+  <p class="demo-note" id="demo-note" hidden>
+    These are sample hearts. Real counts appear after the first update.
+  </p>
+
+  <section class="stage" aria-label="Heart map">
+    <div class="tabs" id="tabs"></div>
+    <div class="map" id="map">
+      <canvas id="canvas" role="img"></canvas>
+      <div id="chips"></div>
+    </div>
+    <div class="caption">
+      <p class="caption-text" id="caption" aria-live="polite"></p>
+      <div class="caption-actions">
+        <button class="ghost" id="simulate" type="button" hidden>Simulate a comment</button>
+        <a class="cta" id="caption-cta" target="_blank" rel="noopener" hidden></a>
+      </div>
+    </div>
+  </section>
+
+  <div class="columns">
+    <section class="steps">
+      <h2>To join the challenge</h2>
+      <ol>
+        <li><span id="vote-step">Vote for BTS at the Mnet MAMA Awards 2026</span> and save your voting receipt.</li>
+        <li>Go to <a id="ig-link" target="_blank" rel="noopener"></a> on Instagram and find the post for your continent.</li>
+        <li>Drop your voting receipt in the comments.</li>
+        <li>Every receipt you comment lights a purple heart on your continent's map.</li>
+      </ol>
+    </section>
+
+    <section class="posts">
+      <h2>Find your continent's post</h2>
+      <ul id="posts"></ul>
+    </section>
+  </div>
+
+  <footer>
+    <p>The challenge happens on Instagram only. This page shows the hearts and doesn't collect anything from you.</p>
+    <p id="updated"></p>
+    <p>A fan-run project. Not affiliated with BTS, BIGHIT MUSIC, HYBE, Mnet or CJ ENM.</p>
+  </footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

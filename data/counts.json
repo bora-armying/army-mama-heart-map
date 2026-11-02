@@ -1,0 +1,12 @@
+{
+  "demo": true,
+  "updatedAt": null,
+  "counts": {
+    "asia": 1840,
+    "europe": 620,
+    "africa": 145,
+    "north-america": 730,
+    "south-america": 410,
+    "oceania": 58
+  }
+}

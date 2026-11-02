@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Update Heart Counts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Open+Sans:wght@400;600;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="wrap admin">
+  <h1 class="admin-title">Update heart counts</h1>
+  <p>Type the number of comments on each continent's Instagram post, then save. Each comment is one heart.</p>
+
+  <form id="form" novalidate>
+    <div id="fields" class="admin-fields"></div>
+    <p class="admin-total">Total: <strong id="total">0</strong> hearts</p>
+
+    <div class="admin-token">
+      <label for="token">GitHub access token</label>
+      <input id="token" type="password" autocomplete="off" spellcheck="false">
+      <label class="admin-check"><input id="remember" type="checkbox" checked> Remember on this device</label>
+      <button class="ghost" id="forget" type="button" hidden>Forget saved token</button>
+    </div>
+
+    <p class="admin-status" id="status" role="status"></p>
+    <button class="cta" id="save" type="submit">Save counts</button>
+  </form>
+
+  <p><a href="./">Back to the map</a></p>
+</main>
+<script src="admin.js"></script>
+</body>
+</html>

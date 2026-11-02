@@ -1,0 +1,13 @@
+{
+  "instagram": "btsvotingbrigade",
+  "voteUrl": "",
+  "repo": "",
+  "continents": [
+    { "id": "asia", "name": "Asia", "postUrl": "" },
+    { "id": "europe", "name": "Europe", "postUrl": "" },
+    { "id": "africa", "name": "Africa", "postUrl": "" },
+    { "id": "north-america", "name": "North America", "postUrl": "" },
+    { "id": "south-america", "name": "South America", "postUrl": "" },
+    { "id": "oceania", "name": "Oceania", "postUrl": "" }
+  ]
+}
