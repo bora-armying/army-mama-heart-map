@@ -1,17 +1,17 @@
 {
   "demo": false,
-  "updatedAt": "2026-11-03T10:51:24.960Z",
+  "updatedAt": "2026-11-03T10:51:52.687Z",
   "counts": {
-    "asia": 68,
+    "asia": 117,
     "europe": 31,
-    "africa": 117,
+    "africa": 21,
     "north-america": 4,
     "south-america": 0,
     "oceania": 3
   },
   "sources": {
     "asia": {
-      "instagram": 68,
+      "instagram": 117,
       "tiktok": 0
     },
     "europe": {
@@ -19,7 +19,7 @@
       "tiktok": 0
     },
     "africa": {
-      "instagram": 117,
+      "instagram": 21,
       "tiktok": 0
     },
     "north-america": {
