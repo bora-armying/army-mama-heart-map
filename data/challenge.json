@@ -4,11 +4,11 @@
   "voteUrl": "",
   "repo": "",
   "continents": [
-    { "id": "asia", "name": "Asia", "postUrl": "", "tiktokUrl": "" },
-    { "id": "europe", "name": "Europe", "postUrl": "", "tiktokUrl": "" },
-    { "id": "africa", "name": "Africa", "postUrl": "", "tiktokUrl": "" },
-    { "id": "north-america", "name": "North America", "postUrl": "", "tiktokUrl": "" },
-    { "id": "south-america", "name": "South America", "postUrl": "", "tiktokUrl": "" },
-    { "id": "oceania", "name": "Oceania", "postUrl": "", "tiktokUrl": "" }
+    {"id": "asia", "name": "Asia", "postUrl": "https://www.instagram.com/p/DfRZ4ubhs8z/", "tiktokUrl": "https://www.tiktok.com/@votingbrigade_ontiktok/photo/7703852832008506676"},
+    {"id": "europe", "name": "Europe", "postUrl": "https://www.instagram.com/p/DfRaRxRhmbG/", "tiktokUrl": "https://www.tiktok.com/@votingbrigade_ontiktok/photo/7703853791598218514"},
+    {"id": "africa", "name": "Africa", "postUrl": "https://www.instagram.com/p/DfRaASOhUmr/", "tiktokUrl": "https://www.tiktok.com/@votingbrigade_ontiktok/photo/7703853319852395784"},
+    {"id": "north-america", "name": "North America", "postUrl": "https://www.instagram.com/p/DfRaHGVhk0k/", "tiktokUrl": "https://www.tiktok.com/@votingbrigade_ontiktok/photo/7703854173313387784"},
+    {"id": "south-america", "name": "South America", "postUrl": "https://www.instagram.com/p/DfRaLX3hcNL/", "tiktokUrl": "https://www.tiktok.com/@votingbrigade_ontiktok/photo/7703854452670860551"},
+    {"id": "oceania", "name": "Oceania", "postUrl": "https://www.instagram.com/p/DfRaV_KBckp/", "tiktokUrl": "https://www.tiktok.com/@votingbrigade_ontiktok/photo/7703854758183963912"}
   ]
 }
