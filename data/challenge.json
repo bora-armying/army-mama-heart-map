@@ -1,13 +1,14 @@
 {
   "instagram": "btsvotingbrigade",
+  "tiktok": "votingbrigade_ontiktok",
   "voteUrl": "",
   "repo": "",
   "continents": [
-    { "id": "asia", "name": "Asia", "postUrl": "" },
-    { "id": "europe", "name": "Europe", "postUrl": "" },
-    { "id": "africa", "name": "Africa", "postUrl": "" },
-    { "id": "north-america", "name": "North America", "postUrl": "" },
-    { "id": "south-america", "name": "South America", "postUrl": "" },
-    { "id": "oceania", "name": "Oceania", "postUrl": "" }
+    { "id": "asia", "name": "Asia", "postUrl": "", "tiktokUrl": "" },
+    { "id": "europe", "name": "Europe", "postUrl": "", "tiktokUrl": "" },
+    { "id": "africa", "name": "Africa", "postUrl": "", "tiktokUrl": "" },
+    { "id": "north-america", "name": "North America", "postUrl": "", "tiktokUrl": "" },
+    { "id": "south-america", "name": "South America", "postUrl": "", "tiktokUrl": "" },
+    { "id": "oceania", "name": "Oceania", "postUrl": "", "tiktokUrl": "" }
   ]
 }

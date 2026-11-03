@@ -1,18 +1,18 @@
 # ARMY Heart Map
 
-The website for the BTS MAMA Awards 2026 voting challenge. Each continent has one Instagram post, and every comment on that post lights one purple heart on that continent's map. All participation happens on Instagram; the site only displays the result.
+The website for the BTS MAMA Awards 2026 voting challenge. Each continent has one Instagram post and one TikTok post, and every comment on either post lights one purple heart on that continent's map. All participation happens on those apps; the site only displays the result.
 
 ## Set up the challenge
 
-1. Publish the six posts (Asia, Europe, Africa, North America, South America, Oceania) on Instagram.
-2. Paste each post's link into `postUrl` in `data/challenge.json`. Set `voteUrl` to the MAMA voting page, and check that `instagram` is the right handle.
+1. Publish the posts for each continent (Asia, Europe, Africa, North America, South America, Oceania) on Instagram and TikTok.
+2. Paste each post's link into `postUrl` (Instagram) and `tiktokUrl` (TikTok) in `data/challenge.json`, and set `tiktok` to the TikTok handle. Set `voteUrl` to the MAMA voting page, and check that `instagram` is the right handle.
 3. Push to `main` on GitHub and set Settings, Pages, Source to **GitHub Actions**.
 
 The site shows sample hearts, and says so on the page, until the first save.
 
 ## Update the hearts
 
-Open `admin.html` on the published site (for example `https://<owner>.github.io/<repo>/admin.html`), type each post's comment count and press **Save counts**. Each comment is one heart. The map updates in about 2 minutes, and open pages light the new hearts without a reload.
+Open `admin.html` on the published site (for example `https://<owner>.github.io/<repo>/admin.html`), type each continent's Instagram and TikTok comment counts and press **Save counts**. Each comment is one heart, and the map shows the total. The map updates in about 2 minutes, and open pages light the new hearts without a reload.
 
 Saving a lower number than the current one asks you to press Save again, in case it's a typo.
 

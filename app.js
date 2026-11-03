@@ -612,6 +612,7 @@
       count.textContent = hearts(total());
       caption.replaceChildren(count, ' lit across six continents. Pick yours to see it up close.');
       cta.hidden = true;
+      $('caption-tiktok').hidden = true;
       canvas.setAttribute('aria-label', `World map with ${hearts(total())} lit.`);
     } else {
       const c = byId[current];
@@ -622,7 +623,10 @@
       );
       cta.hidden = false;
       cta.href = c.postUrl || profileUrl;
-      cta.textContent = c.postUrl ? `Comment on the ${c.name} post` : `Open @${challenge.instagram}`;
+      cta.textContent = c.postUrl ? 'Comment on Instagram' : `Open @${challenge.instagram}`;
+      $('caption-tiktok').hidden = !c.tiktokUrl;
+      $('caption-tiktok').href = c.tiktokUrl;
+      $('caption-tiktok').textContent = 'Comment on TikTok';
       canvas.setAttribute('aria-label', `Map of ${c.name} with ${hearts(n)} lit.`);
     }
     $('simulate').hidden = !demo;
@@ -653,17 +657,25 @@
     return out;
   }
 
+  function externalLink(className, href, text, label) {
+    const link = document.createElement('a');
+    link.className = className;
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = text;
+    link.setAttribute('aria-label', label);
+    return link;
+  }
+
   function renderPosts() {
     const list = $('posts');
     list.replaceChildren();
     // Stays in a fixed order so people can find their continent at a glance.
     for (const c of continents) {
       const n = counts[c.id] ?? 0;
-      const tile = document.createElement('a');
+      const tile = document.createElement('div');
       tile.className = 'tile';
-      tile.target = '_blank';
-      tile.rel = 'noopener';
-      tile.href = c.postUrl || profileUrl;
       const name = document.createElement('span');
       name.className = 'tile-name';
       name.textContent = c.name;
@@ -672,10 +684,19 @@
       const number = document.createElement('b');
       number.textContent = fmt(n);
       count.append(number, n === 1 ? ' heart' : ' hearts');
-      const action = document.createElement('span');
-      action.className = 'tile-action';
-      action.textContent = c.postUrl ? 'Comment on Instagram ↗' : 'Post coming soon';
-      tile.append(thumb(c.id), name, count, action);
+      tile.append(thumb(c.id), name, count);
+      const posts = [['Instagram', c.postUrl], ['TikTok', c.tiktokUrl]].filter(([, url]) => url);
+      if (posts.length) {
+        const links = document.createElement('div');
+        links.className = 'tile-links';
+        for (const [label, url] of posts) links.append(externalLink('tile-link', url, `${label} ↗`, `Comment on the ${c.name} post on ${label}`));
+        tile.append(links);
+      } else {
+        const soon = document.createElement('span');
+        soon.className = 'tile-action';
+        soon.textContent = 'Posts coming soon';
+        tile.append(soon);
+      }
       const li = document.createElement('li');
       li.append(tile);
       list.append(li);
@@ -781,6 +802,14 @@
 
   $('ig-link').href = profileUrl;
   $('ig-link').textContent = `@${challenge.instagram}`;
+  if (challenge.tiktok) {
+    const tiktok = document.createElement('a');
+    tiktok.href = `https://www.tiktok.com/@${challenge.tiktok}`;
+    tiktok.target = '_blank';
+    tiktok.rel = 'noopener';
+    tiktok.textContent = `@${challenge.tiktok}`;
+    $('tiktok-step').replaceChildren(' or ', tiktok, ' on TikTok');
+  }
   if (challenge.voteUrl) {
     const vote = document.createElement('a');
     vote.href = challenge.voteUrl;

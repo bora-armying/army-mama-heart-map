@@ -45,38 +45,72 @@
   }
 
   // ---- Form ----
+  const PLATFORMS = [['instagram', 'Instagram'], ['tiktok', 'TikTok']];
+
+  // Saves from before TikTok was added only have one number, all from Instagram.
+  function savedCount(c, platform) {
+    const saved = published.sources?.[c.id]?.[platform];
+    if (saved !== undefined) return saved;
+    return platform === 'instagram' ? published.counts[c.id] ?? 0 : 0;
+  }
+
+  const head = document.createElement('div');
+  head.className = 'admin-field';
+  head.setAttribute('aria-hidden', 'true');
+  head.append(document.createElement('span'));
+  for (const [, name] of PLATFORMS) {
+    const heading = document.createElement('span');
+    heading.className = 'admin-head';
+    heading.textContent = name;
+    head.append(heading);
+  }
+  $('fields').append(head);
+
   for (const c of continents) {
     const row = document.createElement('div');
     row.className = 'admin-field';
     const label = document.createElement('label');
-    label.htmlFor = `count-${c.id}`;
+    label.htmlFor = `count-${c.id}-instagram`;
     label.textContent = c.name;
-    const input = document.createElement('input');
-    input.id = `count-${c.id}`;
-    input.type = 'text';
-    input.inputMode = 'numeric';
-    input.autocomplete = 'off';
-    // Sample counts must never be saved as real ones, so start empty.
-    input.value = published.demo ? '' : String(published.counts[c.id] ?? 0);
-    input.addEventListener('input', () => {
-      confirmedDrop = '';
-      updateTotal();
-    });
-    row.append(label, input);
+    row.append(label);
+    for (const [platform, name] of PLATFORMS) {
+      const input = document.createElement('input');
+      input.id = `count-${c.id}-${platform}`;
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.autocomplete = 'off';
+      input.setAttribute('aria-label', `${c.name} ${name} comments`);
+      // Sample counts must never be saved as real ones, so start empty.
+      input.value = published.demo ? '' : String(savedCount(c, platform));
+      input.addEventListener('input', () => {
+        confirmedDrop = '';
+        updateTotal();
+      });
+      row.append(input);
+    }
     $('fields').append(row);
   }
 
   function readCounts() {
     const counts = {};
+    const sources = {};
     const bad = [];
     for (const c of continents) {
-      // Instagram shows counts like 1,234, so commas are fine.
-      const text = $(`count-${c.id}`).value.replace(/[,\s]/g, '');
-      const n = Number(text);
-      if (!/^\d+$/.test(text) || !Number.isSafeInteger(n)) bad.push(c.name);
-      else counts[c.id] = n;
+      sources[c.id] = {};
+      counts[c.id] = 0;
+      for (const [platform, name] of PLATFORMS) {
+        // The apps show counts like 1,234, so commas are fine.
+        const text = $(`count-${c.id}-${platform}`).value.replace(/[,\s]/g, '');
+        const n = Number(text);
+        if (!/^\d+$/.test(text) || !Number.isSafeInteger(n)) {
+          bad.push(`${c.name} ${name}`);
+        } else {
+          sources[c.id][platform] = n;
+          counts[c.id] += n;
+        }
+      }
     }
-    return { counts, bad };
+    return { counts, sources, bad };
   }
 
   function updateTotal() {
@@ -134,7 +168,7 @@
 
   $('form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const { counts, bad } = readCounts();
+    const { counts, sources, bad } = readCounts();
     if (bad.length) return status(`Enter a whole number for ${bad.join(', ')}. Use 0 if there are no comments yet.`, 'error');
     if (!isLocal && !$('token').value.trim()) return status('Paste your GitHub access token first.', 'error');
 
@@ -153,7 +187,7 @@
         status(`This lowers ${list}, which removes hearts. Press Save again to confirm.`, 'error');
         return;
       }
-      const body = { demo: false, updatedAt: new Date().toISOString(), counts };
+      const body = { demo: false, updatedAt: new Date().toISOString(), counts, sources };
       await github(COUNTS_PATH, {
         method: 'PUT',
         body: JSON.stringify({

@@ -32,7 +32,7 @@ body {
 @supports ((background-clip: text) or (-webkit-background-clip: text)) {
   .total, .demo-note, .caption-text, .swipe-hint, h2, h3, .steps p,
   .tile-name, .tile-count, .tile-action, footer p,
-  .admin > p, .admin-title, .admin-field label, .admin-total, .admin-token > label, .admin-status {
+  .admin > p, .admin-title, .admin-field > label, .admin-total, .admin-token > label, .admin-status {
     background-image: var(--ink);
     -webkit-background-clip: text;
     background-clip: text;
@@ -187,14 +187,23 @@ a:hover { color: var(--violet); }
   border-radius: 16px;
   background: var(--paper);
   text-decoration: none;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
-.tile:hover { border-color: var(--violet); box-shadow: 0 8px 24px rgba(75, 36, 150, 0.16); transform: translateY(-2px); }
 .tile canvas { width: 100%; height: auto; margin-bottom: 4px; }
 .tile-name { font-weight: 800; font-size: 1.0625rem; line-height: 1.3; }
 .tile-count { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
 .tile-count b { font-weight: 800; font-size: 1.5rem; }
 .tile-action { margin-top: 6px; font-size: 0.875rem; font-weight: 600; }
+.tile-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-self: end; }
+.tile-link {
+  padding: 4px 12px;
+  border: 1px solid var(--violet);
+  border-radius: 999px;
+  color: var(--grape);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.tile-link:hover { background: var(--ink); color: var(--milk); }
 
 footer { padding-top: 8px; font-size: 0.8125rem; text-align: center; }
 footer p { margin: 0; }
@@ -220,7 +229,8 @@ footer p { margin: 0; }
 .admin-title { font-size: clamp(1.75rem, 6vw, 2.25rem); font-weight: 800; line-height: 1.2; margin: 0; }
 #form { display: grid; gap: 20px; }
 .admin-fields { display: grid; gap: 10px; }
-.admin-field { display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center; font-weight: 600; }
+.admin-field { display: grid; grid-template-columns: minmax(0, 1fr) 92px 92px; gap: 8px; align-items: center; font-weight: 600; }
+.admin-head { font-size: 0.8125rem; font-weight: 700; color: var(--grape); text-align: right; }
 .admin-field input, #token {
   width: 100%;
   font: 600 1rem var(--body);
@@ -239,6 +249,3 @@ footer p { margin: 0; }
 .admin .cta { justify-self: start; }
 .admin .cta:disabled { opacity: 0.6; cursor: default; }
 
-@media (prefers-reduced-motion: reduce) {
-  .tile, .tile:hover { transition: none; transform: none; }
-}
