@@ -6,6 +6,7 @@
   const DETAIL_PHONE = { w: 1000, h: 1000 }; // tall screens have the height to spare
   const phone = matchMedia('(max-width: 720px)');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SONG_VIDEO = 'Fw7C6IsDYgI';
   const BEAT_MS = 1600;
   const REVEAL_MS = 1100;
   const POP_MS = 1000;
@@ -828,6 +829,70 @@
     current = routeFromHash();
     show();
   });
+
+  // ---- Song: a play button on the map, with YouTube's player running unseen ----
+  function setUpSong(videoId) {
+    let player = null;
+    let startCheck = null;
+    $('song-link').href = `https://www.youtube.com/watch?v=${videoId}`;
+
+    function showFailure() {
+      $('song-play').hidden = true;
+      $('song-panel').classList.remove('is-open');
+      $('song-link').hidden = false;
+    }
+
+    function showPlaying(playing) {
+      const label = `${playing ? 'Pause' : 'Play'} Mikrokosmos by BTS`;
+      // SVG elements have no .hidden property, so set the attribute itself.
+      $('song-play-icon').toggleAttribute('hidden', playing);
+      $('song-pause-icon').toggleAttribute('hidden', !playing);
+      $('song-play').setAttribute('aria-label', label);
+      $('song-play').title = label;
+    }
+
+    $('song-play').addEventListener('click', () => {
+      if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+        // If a phone blocks the start, show YouTube's own play button to tap.
+        clearTimeout(startCheck);
+        startCheck = setTimeout(() => {
+          const state = player.getPlayerState();
+          if (state !== YT.PlayerState.PLAYING && state !== YT.PlayerState.BUFFERING) {
+            $('song-panel').classList.add('is-open');
+          }
+        }, 3000);
+      }
+    });
+
+    window.onYouTubeIframeAPIReady = () => {
+      player = new YT.Player('song-player', {
+        host: 'https://www.youtube-nocookie.com',
+        videoId,
+        playerVars: { controls: 0, loop: 1, playlist: videoId, playsinline: 1, rel: 0, origin: location.origin },
+        events: {
+          onReady: () => { $('song-play').disabled = false; },
+          onStateChange: (e) => {
+            showPlaying(e.data === YT.PlayerState.PLAYING);
+            if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.PAUSED) {
+              clearTimeout(startCheck);
+              $('song-panel').classList.remove('is-open');
+            }
+          },
+          onError: showFailure,
+        },
+      });
+    };
+
+    const api = document.createElement('script');
+    api.src = 'https://www.youtube.com/iframe_api';
+    api.onerror = showFailure;
+    document.head.append(api);
+  }
+
+  setUpSong(SONG_VIDEO);
 
   // Real counts only: polling would wipe out simulated hearts on the sample data.
   setInterval(async () => {

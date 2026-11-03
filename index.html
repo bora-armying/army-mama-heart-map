@@ -24,11 +24,19 @@
 
   <section class="stage" aria-label="Heart map">
     <div class="tabs" id="tabs"></div>
-    <div class="map" id="map">
-      <div class="map-inner" id="map-inner">
-        <canvas id="canvas" role="img"></canvas>
-        <div id="chips"></div>
+    <div class="map-frame">
+      <div class="map" id="map">
+        <div class="map-inner" id="map-inner">
+          <canvas id="canvas" role="img"></canvas>
+          <div id="chips"></div>
+        </div>
       </div>
+      <div class="song-panel" id="song-panel"><div id="song-player"></div></div>
+      <button class="song-play" id="song-play" type="button" aria-label="Play Mikrokosmos by BTS" title="Play Mikrokosmos by BTS" disabled>
+        <svg id="song-play-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+        <svg id="song-pause-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" hidden><path fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+      </button>
+      <a class="song-fallback" id="song-link" target="_blank" rel="noopener" hidden>Listen on YouTube</a>
     </div>
     <p class="swipe-hint" id="swipe-hint">Swipe the map to see every continent</p>
     <div class="caption">
