@@ -1,22 +1,22 @@
 {
   "demo": false,
-  "updatedAt": "2026-11-08T16:55:44.348Z",
+  "updatedAt": "2026-11-08T17:26:10.729Z",
   "counts": {
-    "asia": 382,
-    "europe": 196,
+    "asia": 385,
+    "europe": 197,
     "africa": 183,
-    "north-america": 84,
+    "north-america": 85,
     "south-america": 24,
     "oceania": 43
   },
   "sources": {
     "asia": {
       "instagram": 341,
-      "tiktok": 41
+      "tiktok": 44
     },
     "europe": {
       "instagram": 171,
-      "tiktok": 25
+      "tiktok": 26
     },
     "africa": {
       "instagram": 151,
@@ -24,7 +24,7 @@
     },
     "north-america": {
       "instagram": 80,
-      "tiktok": 4
+      "tiktok": 5
     },
     "south-america": {
       "instagram": 8,
